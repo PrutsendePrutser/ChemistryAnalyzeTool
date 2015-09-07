@@ -14,3 +14,9 @@ def readfile(filepath):
 def writefile(filepath, content):
     with open(filepath, 'w') as writefile:
         writefile.writelines(content)
+        
+def handle_plot_choice(plottype):
+    pass
+
+def handle_axis_assignment(axis_nr, axis_title):
+    pass
