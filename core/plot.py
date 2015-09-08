@@ -3,6 +3,7 @@ Created on 7 sep. 2015
 
 @author: Brian
 '''
+import matplotlib
 
 def createplot(plottype):
     pass
