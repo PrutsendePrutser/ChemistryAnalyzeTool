@@ -26,7 +26,7 @@ def load_csv(filepath):
     return axes_dictionary
 
 def parse_csv_file(content):
-    headers = content[0].split(',')
+    headers = content[0].split('\t')
     axes_dictionary = {}
     for idx, header in enumerate(headers):
         axes_dictionary[idx] = {"columnheader": header,
