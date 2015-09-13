@@ -31,6 +31,22 @@ def create_3d_plot(assigned_axes):
     surf = ax.plot_trisurf(X, Y, Z, cmap=cm.get_cmap('jet'), linewidth=0.2)
 
     plt.show()
+    
+def create_3d_scatter_plot(assigned_axes):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for idx, item in enumerate(assigned_axes[0][2]):
+        print(item)
+        x = float(item)
+        y = float(assigned_axes[1][2][idx])
+        z = float(assigned_axes[2][2][idx])
+        ax.scatter(x, y, z, c="r", marker="^")
+    
+    ax.set_xlabel(assigned_axes[0][1])
+    ax.set_ylabel(assigned_axes[1][1])
+    ax.set_zlabel(assigned_axes[2][1])
+    
+    plt.show()
 
 def create_2d_plot(plot):
     pass

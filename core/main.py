@@ -66,7 +66,7 @@ def writefile(filepath, content):
 def handle_plot_choice(plottype, assigned_axes):
     for axis in assigned_axes:
         print(len(axis[2]))
-    plot.create_3d_plot(assigned_axes)
+    plot.create_3d_scatter_plot(assigned_axes)
 
 def handle_axis_assignment(columnheader, axis_letter, axes_dictionary):
     for axis in axes_dictionary.values():
