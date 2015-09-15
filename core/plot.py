@@ -3,56 +3,55 @@ Created on 7 sep. 2015
 
 @author: Brian
 '''
-import matplotlib
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plot
 import numpy as np
 
-def createplot(plottype):
-    pass
-
-def assign_column_to_axis(axis, column_name):
-    pass
-
-def visualize(plot):
-    pass
-
-def create_3d_plot(assigned_axes):
-    print(len(assigned_axes[0][2]))
-    print(len(assigned_axes[1][2]))
-    print(len(assigned_axes[2][2]))
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
+def create_3d_surface_plot(assigned_axes):
+    # Plot figure
+    figure = plot.figure()
+    
+    # Axes in the plot
+    axes = figure.gca(projection='3d')
+    
+    # Create numpy arrays with floating point values so we can plot the data
     X = np.array([float(num) for num in assigned_axes[0][2]])
     Y = np.array([float(num) for num in assigned_axes[1][2]])
     Z = np.array([float(num) for num in assigned_axes[2][2]])
-    surf = ax.plot_trisurf(X, Y, Z, cmap=cm.get_cmap('jet'), linewidth=0.2)
+    
+    # Create tri-surface plot with jet colorscheme
+    axes.plot_trisurf(X, Y, Z, cmap=cm.get_cmap('jet'), linewidth=0.2)
 
-    plt.show()
+    # Set labels
+    axes.set_xlabel(assigned_axes[0][1])
+    axes.set_ylabel(assigned_axes[1][1])
+    axes.set_zlabel(assigned_axes[2][1])
+
+    # Show
+    plot.show()
     
 def create_3d_scatter_plot(assigned_axes):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    for idx, item in enumerate(assigned_axes[0][2]):
-        print(item)
-        x = float(item)
-        y = float(assigned_axes[1][2][idx])
-        z = float(assigned_axes[2][2][idx])
-        ax.scatter(x, y, z, c="r", marker="^")
+    # Create plot figure
+    figure = plot.figure()
     
-    ax.set_xlabel(assigned_axes[0][1])
-    ax.set_ylabel(assigned_axes[1][1])
-    ax.set_zlabel(assigned_axes[2][1])
+    # Axes in the plot
+    axes = figure.add_subplot(111, projection='3d')
     
-    plt.show()
-
-def create_2d_plot(plot):
-    pass
-
-def export_to_image(plot):
-    pass
-
-def export_to_csv(plot):
-    pass
+    # Loop over the datapoints
+    for i in range(len(assigned_axes[0][2])):
+        x = float(assigned_axes[0][2][i])
+        y = float(assigned_axes[1][2][i])
+        z = float(assigned_axes[2][2][i])
+        
+        # Scatter the points in the graph
+        axes.scatter(x, y, z, c="r", marker="^")
+    
+    # Set labels
+    axes.set_xlabel(assigned_axes[0][1])
+    axes.set_ylabel(assigned_axes[1][1])
+    axes.set_zlabel(assigned_axes[2][1])
+    
+    # Show
+    plot.show()
