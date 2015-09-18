@@ -58,7 +58,7 @@ def parse_csv_file(content):
     for idx, header in enumerate(headers):
         # Create nested dictionary with the columnheader and associated data
         axes_dictionary[idx] = {"columnheader": header,
-                                "data": [row[idx] for row in data_rows]}
+                                "data": [row[idx] for row in data_rows[1:]]}
     
     return axes_dictionary
 
@@ -73,7 +73,19 @@ def readfile(filepath):
 def cleanrows(content):
     # Go through each line, remove windows line endings + whitespace, and split each line on tabs
     # .strip() does not use the \r that are added in the Windows line-endings
-    return [row.replace("\r", "").strip().split('\t') for row in content]
+    table = [row.replace("\r", "").strip().split('\t') for row in content]
+    
+    cleaned_content = []
+    # Remove rows that have missing values
+    for row in table:
+        # Check if row contains any empty elements
+        for v in row:
+            if not v.strip():
+                break
+        # If there are no empty elements we get into the else, add the row to the cleaned_content
+        else:
+            cleaned_content.append(row)
+            
     
 def writefile(filepath, content):
     with open(filepath, 'w') as writefile:
