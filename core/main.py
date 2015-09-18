@@ -77,10 +77,11 @@ def cleanrows(content):
     
     cleaned_content = []
     # Remove rows that have missing values
-    for row in table:
+    for idx, row in enumerate(table):
         # Check if row contains any empty elements
         for v in row:
             if not v.strip():
+                print("Row number %d contains at least one empty value and is removed from the dataset" % idx + 2)
                 break
         # If there are no empty elements we get into the else, add the row to the cleaned_content
         else:
