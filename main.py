@@ -3,10 +3,12 @@ Created on 6 sep. 2015
 
 @author: Brian
 '''
-import plot
+import core.plot as plot
+import utils.formula_parser as formula_parser
 
 assigned_axes = []
 axes_dictionary = {}
+plottype = 0
 
 def main():
     while True:
@@ -31,6 +33,8 @@ def main():
         
         # Make the plot
         handle_plot_choice(plottype, assigned_axes)
+        
+        transform_prompt(assigned_axes, plottype)
         
         # Make sure we exit after plotting
         break
@@ -81,17 +85,77 @@ def cleanrows(content):
         # Check if row contains any empty elements
         for v in row:
             if not v.strip():
-                print("Row number %d contains at least one empty value and is removed from the dataset" % idx + 2)
+                print("Row number %d contains at least one empty value and is removed from the dataset." % idx + 2)
                 break
         # If there are no empty elements we get into the else, add the row to the cleaned_content
         else:
             cleaned_content.append(row)
+    return cleaned_content
             
     
 def writefile(filepath, content):
     with open(filepath, 'w') as writefile:
         writefile.writelines(content)
-        
+
+def transform_prompt(assigned_axes, plottype):
+    choice = 0
+    while choice >= 0:
+        print("For which axis do you want to transform the data?")
+        print("Enter -1 to exit the transform prompt.\n")
+        for idx, axis in enumerate(assigned_axes):
+            print("{}. {}-axis: {}".format(idx+1, axis[0], axis[1]))
+        choice = int(input()) - 1
+        if choice < 0:
+            break
+        print ("Enter your formula here:")
+        formula = input()
+        assigned_axes_copy = list(assigned_axes[:])
+        axes_data = [axis[2] for axis in assigned_axes]
+        axes_data_lists = get_axes_data_in_lists(axes_data)
+        assigned_axes_copy[choice][2] = transform_values(formula, axes_data_lists)
+        handle_plot_choice(plottype, assigned_axes_copy)
+
+def get_axes_data_in_lists(axes_data):
+    axes_data_lists = []
+    for idx, data_point in enumerate(axes_data[0]):
+        data_list = list(map(float, (data_point, axes_data[1][idx], axes_data[2][idx])))
+        axes_data_lists.append(data_list)
+    
+    return axes_data_lists
+
+def transform_values(formula, axis_data):
+    transformed_values = []
+    
+    use_x_axis = False
+    use_y_axis = False
+    use_z_axis = False
+    
+    X = 0
+    Y = 1
+    Z = 2
+    
+    formula = formula.lower()
+    if "x" in formula:
+        use_x_axis = True
+    if "y" in formula:
+        use_y_axis = True
+    if "z" in formula:
+        use_z_axis = True
+    
+    xval = None
+    yval = None
+    zval = None
+    
+    for data_point in axis_data:
+        if use_x_axis:
+            xval = data_point[X]
+        if use_y_axis:
+            yval = data_point[Y]
+        if use_z_axis:
+            zval = data_point[Z]
+        transformed_values.append(str(formula_parser.transform(formula, xval, yval, zval)))
+    return transformed_values
+
 def handle_plot_choice(plottype, assigned_axes):
     if plottype == 1:
         plot.create_3d_surface_plot(assigned_axes)
@@ -103,8 +167,8 @@ def handle_axis_assignment(columnheader, axis_letter, axes_dictionary):
     for axis in axes_dictionary.values():
         # If the user wants to assign the axis with this header name
         if axis["columnheader"] == columnheader:
-            # Return a tuple with the axis-letter, the header name and the data
-            return(axis_letter, columnheader, axis["data"])
+            # Return a list with the axis-letter, the header name and the data
+            return [axis_letter, columnheader, axis["data"]]
     # Return None in case we don't find anything
     return None
     
