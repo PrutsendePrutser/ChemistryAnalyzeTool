@@ -82,14 +82,7 @@ def cleanrows(content):
     cleaned_content = []
     # Remove rows that have missing values
     for idx, row in enumerate(table):
-        # Check if row contains any empty elements
-        for v in row:
-            if not v.strip():
-                print("Row number %d contains at least one empty value and is removed from the dataset." % idx + 2)
-                break
-        # If there are no empty elements we get into the else, add the row to the cleaned_content
-        else:
-            cleaned_content.append(row)
+        cleaned_content.append(row)
     return cleaned_content
             
     
@@ -219,6 +212,23 @@ def assign_axes(axes_dictionary):
         
         # Increment the starting_axis by 1, making it go from x -> y, or y -> z
         starting_axis = bytes([starting_axis[0] + 1])
+        
+    assigned_axes_without_missing_vals = []
+    
+    xaxis = []
+    yaxis = []
+    zaxis = []
+    
+    for idx, v in enumerate(assigned_axes[0][2]):
+        if v.strip() and assigned_axes[1][2][idx].strip() and assigned_axes[2][2][idx].strip():
+            xaxis.append(v)
+            yaxis.append(assigned_axes[1][2][idx])
+            zaxis.append(assigned_axes[2][2][idx])
+        else:
+            print("Row %s is missing values, skipping.." % str(idx+1))
+    assigned_axes[0][2] = xaxis
+    assigned_axes[1][2] = yaxis
+    assigned_axes[2][2] = zaxis
     
     return assigned_axes
 
