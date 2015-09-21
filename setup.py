@@ -12,8 +12,8 @@ opts={
          'py2exe': {'bundle_files': 2,
                     'compressed': True,
                     
-                    'packages' :  ['matplotlib', 'pytz'],
-                    "includes" : ["matplotlib.backends.backend_tkagg"],
+                    'packages' :  ['matplotlib', 'pytz', 'core', 'utils'],
+                    "includes" : ["matplotlib.backends.backend_tkagg",],
                     
                     'excludes': ['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg', "matplotlib.numerix.fft","sip", "PyQt4._qt",
                                  "matplotlib.backends.backend_qt4agg",
