@@ -6,6 +6,8 @@ Created on 6 sep. 2015
 import core.plot as plot
 import utils.formula_parser as formula_parser
 
+from copy import deepcopy
+
 assigned_axes = []
 axes_dictionary = {}
 plottype = 0
@@ -58,11 +60,10 @@ def parse_csv_file(content):
     
     # Make dictionary to store column data
     axes_dictionary = {}
-    
     for idx, header in enumerate(headers):
         # Create nested dictionary with the columnheader and associated data
         axes_dictionary[idx] = {"columnheader": header,
-                                "data": [row[idx] for row in data_rows[1:]]}
+                                "data": [row[idx] for row in data_rows]}
     
     return axes_dictionary
 
@@ -77,13 +78,13 @@ def readfile(filepath):
 def cleanrows(content):
     # Go through each line, remove windows line endings + whitespace, and split each line on tabs
     # .strip() does not use the \r that are added in the Windows line-endings
-    table = [row.replace("\r", "").strip().split('\t') for row in content]
+    table = []
     
-    cleaned_content = []
     # Remove rows that have missing values
-    for idx, row in enumerate(table):
-        cleaned_content.append(row)
-    return cleaned_content
+    for row in content:
+        cleaned_row = row.replace("\r", "").rstrip("\n").split('\t')
+        table.append(cleaned_row)
+    return table
             
     
 def writefile(filepath, content):
@@ -102,12 +103,53 @@ def transform_prompt(assigned_axes, plottype):
             break
         print ("Enter your formula here:")
         formula = input()
-        assigned_axes_copy = list(assigned_axes[:])
-        axes_data = [axis[2] for axis in assigned_axes]
+        assigned_axes_copy = deepcopy(assigned_axes)
+        axes_data = [axis[2] for axis in assigned_axes_copy]
         axes_data_lists = get_axes_data_in_lists(axes_data)
         assigned_axes_copy[choice][2] = transform_values(formula, axes_data_lists)
+        assigned_axes_copy[choice][1] = formula
         handle_plot_choice(plottype, assigned_axes_copy)
+        print("1. Export plot data + original axis to a csv file")
+        print("2. Export plot data to a csv file")
+        print("3. Pass")
+        export_type = int(input())
+        if export_type == 1:
+            export_plot_data_with_original_axis(assigned_axes[choice], assigned_axes_copy)
+        elif export_type == 2:
+            export_plot_data(assigned_axes_copy)
+        else:
+            continue
 
+def export_plot_data(axes_data):
+    print("Enter your path and filename here:")
+    fname = input()
+    
+    table = []
+    headerline = "\t" + "\t".join([axis[1] for axis in axes_data])+"\n"
+    
+    table.append(headerline)
+    for idx, val in enumerate(axes_data[0][2]):
+        row = str(idx) + "\t" + "\t".join([val, axes_data[1][2][idx], axes_data[2][2][idx]])+"\n"
+        table.append(row)
+    
+    writefile(fname, table)
+
+def export_plot_data_with_original_axis(original_axis, axes_data):
+    print("Enter your path and filename here:")
+    fname = input()
+    
+    table = []
+    print(original_axis)
+    print(axes_data)
+    headerline = "\t" + "\t".join([axis[1] for axis in axes_data] + [original_axis[1]])+"\n"
+    print(headerline)
+    table.append(headerline)
+    for idx, val in enumerate(original_axis[2]):
+        row = str(idx) + "\t" + "\t".join([axes_data[0][2][idx], axes_data[1][2][idx], axes_data[2][2][idx], val])+"\n"
+        table.append(row)
+    
+    writefile(fname, table)
+    
 def get_axes_data_in_lists(axes_data):
     axes_data_lists = []
     for idx, data_point in enumerate(axes_data[0]):
@@ -154,6 +196,13 @@ def handle_plot_choice(plottype, assigned_axes):
         plot.create_3d_surface_plot(assigned_axes)
     elif plottype == 2:
         plot.create_3d_scatter_plot(assigned_axes)
+    print("1. Export plot data to a csv file")
+    print("2. Pass")
+    export_type = int(input())
+    if export_type == 1:
+        export_plot_data(assigned_axes)
+    else:
+        return
 
 def handle_axis_assignment(columnheader, axis_letter, axes_dictionary):
     # Go over the dictionary values
@@ -175,13 +224,14 @@ def assign_axis(axis_titles, axes_dictionary, axis_number):
         axis_letter = bytes(axis_number).decode('utf-8')
     print("Assign column to %s - axis:" % axis_letter)
     # Show axis titles with choice number
-    for idx, axis in enumerate(axis_titles):
+    for idx, axis in enumerate(axis_titles[1:]):
         choice_number = str(idx + 1)
         print("{}. {}".format(choice_number, axis))
     # Get input
     choice = int(input())
     # Get columnheader
-    columnheader = axis_titles[choice - 1]
+    columnheader = axis_titles[choice]
+    
     return handle_axis_assignment(columnheader, axis_letter, axes_dictionary)
     
 
@@ -213,8 +263,6 @@ def assign_axes(axes_dictionary):
         # Increment the starting_axis by 1, making it go from x -> y, or y -> z
         starting_axis = bytes([starting_axis[0] + 1])
         
-    assigned_axes_without_missing_vals = []
-    
     xaxis = []
     yaxis = []
     zaxis = []
