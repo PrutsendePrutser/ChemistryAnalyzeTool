@@ -56,3 +56,31 @@ def writefile(filepath, content):
     # Open file and write contents
     with open(filepath, 'w') as writefile:
         writefile.writelines(content)
+        
+def export_plot_data(axes_data):
+    print("Enter your path and filename here:")
+    fname = input()
+    
+    table = []
+    headerline = "\t" + "\t".join([axis[1] for axis in axes_data])+"\n"
+    
+    table.append(headerline)
+    for idx, val in enumerate(axes_data[0][2]):
+        row = str(idx) + "\t" + "\t".join([val, axes_data[1][2][idx], axes_data[2][2][idx]])+"\n"
+        table.append(row)
+    
+    writefile(fname, table)
+
+def export_plot_data_with_original_axis(original_axis, axes_data):
+    print("Enter your path and filename here:")
+    fname = input()
+    
+    table = []
+    headerline = "\t" + "\t".join([axis[1] for axis in axes_data] + [original_axis[1]])+"\n"
+    table.append(headerline)
+    
+    for idx, val in enumerate(original_axis[2]):
+        row = str(idx) + "\t" + "\t".join([axes_data[0][2][idx], axes_data[1][2][idx], axes_data[2][2][idx], val])+"\n"
+        table.append(row)
+    
+    writefile(fname, table)
