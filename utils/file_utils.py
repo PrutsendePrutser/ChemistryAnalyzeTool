@@ -14,6 +14,26 @@ def load_csv(filepath):
     axes_dictionary = parse_csv_file(content)
     return axes_dictionary
 
+def readfile(filepath):
+    with open(filepath, 'r') as openfile:
+        # Read the whole file
+        content = openfile.readlines()
+        # Clean each line, removing \r and split each line on tabs
+        cleaned_content = cleanrows(content)
+        return cleaned_content
+    
+
+def cleanrows(content):
+    # Go through each line, remove windows line endings + whitespace, and split each line on tabs
+    # .strip() does not use the \r that are added in the Windows line-endings
+    table = []
+    
+    # Remove rows that have missing values
+    for row in content:
+        cleaned_row = row.replace("\r", "").rstrip("\n").split('\t')
+        table.append(cleaned_row)
+    return table
+
 def parse_csv_file(content):
     # First row is always column headers
     headers = content[0]
@@ -29,26 +49,6 @@ def parse_csv_file(content):
                                 "data": [row[idx] for row in data_rows]}
     
     return axes_dictionary
-
-def readfile(filepath):
-    with open(filepath, 'r') as openfile:
-        # Read the whole file
-        content = openfile.readlines()
-        # Clean each line, removing \r and split each line on tabs
-        cleaned_content = cleanrows(content)
-        return cleaned_content
-
-def cleanrows(content):
-    # Go through each line, remove windows line endings + whitespace, and split each line on tabs
-    # .strip() does not use the \r that are added in the Windows line-endings
-    table = []
-    
-    # Remove rows that have missing values
-    for row in content:
-        cleaned_row = row.replace("\r", "").rstrip("\n").split('\t')
-        table.append(cleaned_row)
-    return table
-            
     
 def writefile(filepath, content):
     with open(filepath, 'w') as writefile:
