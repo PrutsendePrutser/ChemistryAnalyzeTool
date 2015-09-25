@@ -12,6 +12,7 @@ def load_csv(filepath):
     # These are nested dictionaries, where each nested dictionary contains a columnheader with the column name
     # and a data element that contains a list with all the values
     axes_dictionary = parse_csv_file(content)
+   
     return axes_dictionary
 
 def readfile(filepath):
@@ -19,8 +20,9 @@ def readfile(filepath):
         # Read the whole file
         content = openfile.readlines()
         # Clean each line, removing \r and split each line on tabs
-        cleaned_content = cleanrows(content)
-        return cleaned_content
+        table = cleanrows(content)
+        
+        return table
     
 
 def cleanrows(content):
@@ -36,14 +38,14 @@ def cleanrows(content):
 
 def parse_csv_file(content):
     # First row is always column headers
-    headers = content[0]
+    column_headers = content[0]
     
     # Skip column header when we parse the data
     data_rows = content[1:]
     
     # Make dictionary to store column data
     axes_dictionary = {}
-    for idx, header in enumerate(headers):
+    for idx, header in enumerate(column_headers):
         # Create nested dictionary with the columnheader and associated data
         axes_dictionary[idx] = {"columnheader": header,
                                 "data": [row[idx] for row in data_rows]}
@@ -51,5 +53,6 @@ def parse_csv_file(content):
     return axes_dictionary
     
 def writefile(filepath, content):
+    # Open file and write contents
     with open(filepath, 'w') as writefile:
         writefile.writelines(content)
