@@ -11,10 +11,10 @@ import matplotlib
 opts={
          'py2exe': {'bundle_files': 2,
                     'compressed': True,
-                    
+                    # Include required matplotlib packages + own packages
                     'packages' :  ['matplotlib', 'pytz', 'core', 'utils'],
                     "includes" : ["matplotlib.backends.backend_tkagg",],
-                    
+                    # We don't want to use these modules from matplotlib
                     'excludes': ['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg', "matplotlib.numerix.fft","sip", "PyQt4._qt",
                                  "matplotlib.backends.backend_qt4agg",
                                  "matplotlib.numerix.linear_algebra", "matplotlib.numerix.random_array",
@@ -39,8 +39,10 @@ opts={
                                   ],
                     }
 }
+# Get required datafiles from matplotlib
 data_files=matplotlib.get_py2exe_datafiles()
 
 zipfile=None
 
+# Create console application with the given options and files
 setup(console=["main.py"], options=opts, data_files=data_files, zipfile=None)
