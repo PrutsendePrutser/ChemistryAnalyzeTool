@@ -239,12 +239,15 @@ def assign_axes(axes_dictionary):
     zaxis = []
     
     for idx, v in enumerate(assigned_axes[0][2]):
+        # If all the three values are present, add them to the list of values for the corresponding axis
         if v.strip() and assigned_axes[1][2][idx].strip() and assigned_axes[2][2][idx].strip():
             xaxis.append(v)
             yaxis.append(assigned_axes[1][2][idx])
             zaxis.append(assigned_axes[2][2][idx])
         else:
             print("Row %s is missing values, skipping.." % str(idx+1))
+    
+    # Update values
     assigned_axes[0][2] = xaxis
     assigned_axes[1][2] = yaxis
     assigned_axes[2][2] = zaxis

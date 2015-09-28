@@ -62,10 +62,13 @@ def export_plot_data(axes_data):
     fname = input()
     
     table = []
+    # Add leading tab to columnheader row for sample column
     headerline = "\t" + "\t".join([axis[1] for axis in axes_data])+"\n"
     
     table.append(headerline)
+    # Go through the values
     for idx, val in enumerate(axes_data[0][2]):
+        # Add sample number + the value for each column, separated by tabs
         row = str(idx) + "\t" + "\t".join([val, axes_data[1][2][idx], axes_data[2][2][idx]])+"\n"
         table.append(row)
     
@@ -76,10 +79,13 @@ def export_plot_data_with_original_axis(original_axis, axes_data):
     fname = input()
     
     table = []
+    # Add leading tab to columnheader row for the sample column
     headerline = "\t" + "\t".join([axis[1] for axis in axes_data] + [original_axis[1]])+"\n"
     table.append(headerline)
     
+    # Go over the values
     for idx, val in enumerate(original_axis[2]):
+        # Add sample number + the value for each column, separated by tabs
         row = str(idx) + "\t" + "\t".join([axes_data[0][2][idx], axes_data[1][2][idx], axes_data[2][2][idx], val])+"\n"
         table.append(row)
     
