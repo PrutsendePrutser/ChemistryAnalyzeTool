@@ -25,11 +25,8 @@ def main():
             print("File not found, please enter the correct path to your file, using forward slashes instead of backslashes.")
             continue
         
-        # Prompt user to choose the plot type
-        print("""Choose the number of the plot type you want to use:
-                1. 3D surface plot
-                2. 3D scatter plot""")
-        plottype = int(input())
+        # Prompt the user to specify a plot type
+        plottype = get_plot_type()
         
         # Let the user choose a data type for the x-, y- and z-axis
         assigned_axes = assign_axes(axes_dictionary)
@@ -37,81 +34,109 @@ def main():
         # Make the plot
         handle_plot_choice(plottype, assigned_axes)
         
+        export_type = show_export_prompt(transformed = False)
+        if export_type == 1:
+            fileutils.export_plot_data(assigned_axes)
+        else:
+            return
+        
+        # Ask the user if he wants to apply a formula to one of the axes
         transform_prompt(assigned_axes, plottype)
         
         # Make sure we exit after plotting
         break
 
+def get_plot_type():
+    # Prompt user to choose the plot type
+    print("""Choose the number of the plot type you want to use:
+            1. 3D surface plot
+            2. 3D scatter plot""")
+    plottype = int(input())
+    return plottype
 
+def get_formula():
+    print ("Enter your formula here:")
+    formula = input()
+    return formula
+
+def get_axis_to_transform():
+    print("For which axis do you want to transform the data?")
+    print("Enter -1 to exit the transform prompt.\n")
+    for idx, axis in enumerate(assigned_axes):
+        print("{}. {}-axis: {}".format(idx+1, axis[0], axis[1]))
+    choice = int(input()) - 1
+    return choice
+
+def transform_data(formula, choice, assigned_axes):
+    # Create a deep copy so we don't change values in the original nested lists that contain the values
+    assigned_axes_copy = deepcopy(assigned_axes)
+    
+    # Collect the elements from the axes that contains the data
+    axes_data = [axis[2] for axis in assigned_axes_copy]
+    
+    # Get a list that contains nested lists with the x, y and z coordinates for each data point
+    axes_data_lists = get_axes_data_in_lists(axes_data)
+    
+    # Update the values for the selected axis, applying the formula
+    assigned_axes_copy[choice][2] = transform_values(formula, axes_data_lists)
+    
+    # Change the column header for the selected column to contain the formula
+    assigned_axes_copy[choice][1] = formula
+    
+def show_export_prompt(transformed = False):
+    print("1. Pass")
+    print("2. Export plot data to a csv file")
+    if (transformed):
+        print("3. Export plot data + original axis to a csv file ")
+    export_type = int(input())
+    
+    return export_type
 
 def transform_prompt(assigned_axes, plottype):
     choice = 0
     while choice >= 0:
-        print("For which axis do you want to transform the data?")
-        print("Enter -1 to exit the transform prompt.\n")
-        for idx, axis in enumerate(assigned_axes):
-            print("{}. {}-axis: {}".format(idx+1, axis[0], axis[1]))
-        choice = int(input()) - 1
+        
+        # Prompt user to choose an axis to apply a formula to
+        choice = get_axis_to_transform()
+        
+        # -1 means exit
         if choice < 0:
             break
-        print ("Enter your formula here:")
-        formula = input()
-        assigned_axes_copy = deepcopy(assigned_axes)
-        axes_data = [axis[2] for axis in assigned_axes_copy]
-        axes_data_lists = get_axes_data_in_lists(axes_data)
-        assigned_axes_copy[choice][2] = transform_values(formula, axes_data_lists)
-        assigned_axes_copy[choice][1] = formula
-        handle_plot_choice(plottype, assigned_axes_copy)
-        print("1. Export plot data + original axis to a csv file")
-        print("2. Export plot data to a csv file")
-        print("3. Pass")
-        export_type = int(input())
+        
+        # Get the formula
+        formula = get_formula()
+        
+        # Get the transformed data
+        transformed_data = transform_data(formula, choice, assigned_axes)
+        
+        # Plot the new data
+        handle_plot_choice(plottype, transformed_data)
+        
+        # Ask the user for the export type
+        export_type = show_export_prompt(transformed = True)
+        
+        # Export data in plot
         if export_type == 1:
-            export_plot_data_with_original_axis(assigned_axes[choice], assigned_axes_copy)
+            fileutils.export_plot_data(transformed_data)
+        # Export data in plot + the original axis
         elif export_type == 2:
-            export_plot_data(assigned_axes_copy)
+            fileutils.export_plot_data_with_original_axis(assigned_axes[choice], transformed_data)
         else:
             continue
-
-def export_plot_data(axes_data):
-    print("Enter your path and filename here:")
-    fname = input()
-    
-    table = []
-    headerline = "\t" + "\t".join([axis[1] for axis in axes_data])+"\n"
-    
-    table.append(headerline)
-    for idx, val in enumerate(axes_data[0][2]):
-        row = str(idx) + "\t" + "\t".join([val, axes_data[1][2][idx], axes_data[2][2][idx]])+"\n"
-        table.append(row)
-    
-    fileutils.writefile(fname, table)
-
-def export_plot_data_with_original_axis(original_axis, axes_data):
-    print("Enter your path and filename here:")
-    fname = input()
-    
-    table = []
-    print(original_axis)
-    print(axes_data)
-    headerline = "\t" + "\t".join([axis[1] for axis in axes_data] + [original_axis[1]])+"\n"
-    print(headerline)
-    table.append(headerline)
-    for idx, val in enumerate(original_axis[2]):
-        row = str(idx) + "\t" + "\t".join([axes_data[0][2][idx], axes_data[1][2][idx], axes_data[2][2][idx], val])+"\n"
-        table.append(row)
-    
-    fileutils.writefile(fname, table)
     
 def get_axes_data_in_lists(axes_data):
     axes_data_lists = []
+    # Go over the data
     for idx, data_point in enumerate(axes_data[0]):
+        # Create a list that contains floating point values of the data points
         data_list = list(map(float, (data_point, axes_data[1][idx], axes_data[2][idx])))
+        # Add
         axes_data_lists.append(data_list)
     
     return axes_data_lists
 
 def transform_values(formula, axis_data):
+    # List 
     transformed_values = []
     
     use_x_axis = False
@@ -149,13 +174,6 @@ def handle_plot_choice(plottype, assigned_axes):
         plot.create_3d_surface_plot(assigned_axes)
     elif plottype == 2:
         plot.create_3d_scatter_plot(assigned_axes)
-    print("1. Export plot data to a csv file")
-    print("2. Pass")
-    export_type = int(input())
-    if export_type == 1:
-        export_plot_data(assigned_axes)
-    else:
-        return
 
 def handle_axis_assignment(columnheader, axis_letter, axes_dictionary):
     # Go over the dictionary values
